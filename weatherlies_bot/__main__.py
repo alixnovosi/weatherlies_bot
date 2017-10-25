@@ -5,7 +5,6 @@ import random
 import time
 
 import botskeleton
-import tweepy
 
 import weather_gen
 
