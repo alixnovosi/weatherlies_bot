@@ -13,7 +13,7 @@ setup(author="Andrew Michaud",
           "console_scripts": ["weatherlies_bot = weatherlies_bot.__main__:main"]
       },
 
-      install_requires=["tweepy>=3.5", "requests>=2.11.1"],
+      install_requires=["botskeleton>=1.0.4", "requests>=2.11.1"],
 
       license="BSD3",
 
