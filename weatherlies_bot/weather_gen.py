@@ -226,7 +226,7 @@ def sunthing_handle(thing, place_name, json):
 
 def get_time_descriptor():
     """Get a phrase like "currently" or "right now", or nothing at all. Provides leading space."""
-    return random.choice[" currently", " right now", " this moment", ""]
+    return random.choice([" currently", " right now", " this moment", ""])
 
 # Wrappers around Open Weather Map API, to get weather info.
 def get_weather_from_api():
