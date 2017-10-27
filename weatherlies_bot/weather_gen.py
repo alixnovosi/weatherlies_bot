@@ -1,22 +1,26 @@
 import logging
-import os
 import random
 from datetime import datetime, timedelta
 from enum import Enum
+from os import path
 
+import botskeleton
 import requests
 
-import util
 
+HERE = path.abspath(path.dirname(__file__))
+SECRETS_DIR = path.join(HERE, "SECRETS")
 
 WEATHER_ROOT = "http://api.openweathermap.org/data/2.5/weather"
 
-with open(os.path.join(util.HERE, "api_key"), "r") as f:
+with open(path.join(SECRETS_DIR, "api_key"), "r") as f:
     API_KEY = f.read().strip()
 
-
 OWNER_URL = "https://github.com/andrewmichaud/randweather_bot"
-USER_AGENT = "randweather_twitterbot/" + util.VERSION + "(" + OWNER_URL + ")"
+with open(path.join(path.join(HERE, ".."), "VERSION")) as f:
+    VERSION = f.read().strip()
+
+USER_AGENT = f"randweather_twitterbot/{VERSION} ({OWNER_URL})"
 HEADERS = {"User-Agent": USER_AGENT}
 
 LOG = logging.getLogger("root")
@@ -25,11 +29,11 @@ LOG = logging.getLogger("root")
 def produce_status():
     """Produce status from the current weather somewhere."""
     json = get_weather_from_api()
-    LOG.debug("Full JSON from weather API: {}".format(json))
+    LOG.debug(f"Full JSON from weather API: {json}")
 
     name_json = get_weather_from_api()
     place_name = name_json["name"]
-    LOG.info("Producing weather lie for {}".format(place_name))
+    LOG.info(f"Producing weather lie for {place_name}")
 
     thing = random.choice(list(WeatherThings))
 
@@ -58,19 +62,19 @@ def windspeed_handle(place_name, json):
     # Either show in m/s or mph.
     if random.choice([True, False]):
         return random.choice([
-            "The current wind speed in {} is {} meters/second.",
-            "The wind speed in {} is currently {} m/s.",
-            "The wind speed in {} is {} m/s at this moment.",
-        ]).format(place_name, wind_speed)
+            f"The current wind speed in {place_name} is {wind_speed} meters/second.",
+            f"The wind speed in {place_name} is currently {wind_speed} m/s.",
+            f"The wind speed in {place_name} is {wind_speed} m/s at this moment.",
+        ])
 
     else:
         # Close enough?
         imperial_speed = round(wind_speed * 2.237, 2)
         return random.choice([
-            "The current wind speed in {} is {} miles per hour.",
-            "The wind speed in {} is {} mph.",
-            "The wind speed in {} is {} mph, last I checked.",
-        ]).format(place_name, imperial_speed)
+            f"The current wind speed in {place_name} is {imperial_speed} miles per hour.",
+            f"The wind speed in {place_name} is {imperial_speed} mph.",
+            f"The wind speed in {place_name} is {imperial_speed} mph last I checked.",
+        ])
 
 
 def cloudiness_handle(place_name, json):
@@ -82,8 +86,8 @@ def cloudiness_handle(place_name, json):
     # is.
     if random.choice([True, False]):
         return random.choice([
-            "The cloudiness in {} is {}%, currently.".format(place_name, cloudiness),
-            "It is {}% cloudy in {} right now.".format(cloudiness, place_name),
+            f"The cloudiness in {place_name} is {cloudiness}%, currently.",
+            f"It is {cloudiness}% cloudy in {place_name} right now.",
         ])
 
     else:
@@ -91,47 +95,50 @@ def cloudiness_handle(place_name, json):
         # I don't know if OWM's cloudiness percent is supposed to translate to Oktas, but whatever.
         # Clear/Sunny - 0/8 okta.
         if cloudiness < 12.5:
-            return random.choice([
-                "It's clear in {} right now ({}% cloudiness).",
-                "There are almost no clouds in {} right now ({}% cloudiness).",
-                "Good luck finding clouds in {} right now ({}% cloudiness).",
-            ]).format(place_name, cloudiness)
+            cloudiness_phrase = random.choice([
+                "It's clear",
+                "There are almost no clouds",
+                "Good luck finding clouds",
+            ])
 
         # Mostly Clear/Mostly Sunny - 1/8 to 2.5/8 okta.
         elif cloudiness >= 12.5 and cloudiness < 31.25:
-            return random.choice([
-                "It's not very cloudy in {} right now ({}% cloudiness).",
-                "There are not many clouds in {} right now ({}% cloudiness).",
-                "It's very clear in {} right now ({}% cloudiness).",
-                "It's mostly clear in {} right now ({}% cloudiness).",
-            ]).format(place_name, cloudiness)
+            cloudiness_phrase = random.choice([
+                "It's not very cloudy",
+                "There are not many clouds",
+                "It's very clear",
+                "It's mostly clear",
+            ])
 
         # Partly Cloudy/Partly Sunny - 2.5/8 to 4.5/8 okta.
         elif cloudiness >= 31.25 and cloudiness < 56.25:
-            return random.choice([
-                "It's kinda cloudy in {} right now ({}% cloudiness).",
-                "There are a few clouds in {} right now ({}% cloudiness).",
-                "It's partly clear in {} right now ({}% cloudiness).",
-                "It's partly cloudy in {} right now ({}% cloudiness).",
-            ]).format(place_name, cloudiness)
+            cloudiness_phrase = random.choice([
+                "It's kinda cloudy",
+                "There are a few clouds",
+                "It's partly clear",
+                "It's partly cloudy",
+            ])
 
         # Mostly Cloudy/Considerable Cloudiness - 4.5/8 to 7.5/8 okta.
         elif cloudiness >= 56.25 and cloudiness < 93.75:
-            return random.choice([
-                "It's very cloudy in {} right now ({}% cloudiness).",
-                "It's mostly cloudy in {} right now ({}% cloudiness).",
-                "There are a bunch of clouds in {} right now ({}% cloudiness).",
-                "It's not very clear in {} right now ({}% cloudiness).",
-                "Wow! There are a lot of clouds in {} right now ({}% cloudiness).",
-            ]).format(place_name, cloudiness)
+            cloudiness_phrase = random.choice([
+                "It's very cloudy",
+                "It's mostly cloudy",
+                "There are a bunch of clouds",
+                "It's not very clear",
+                "Wow! There are a lot of clouds",
+            ])
 
         # Cloudy - 7.5/8 okta to 8/8 okta.
         else:
-            return random.choice([
-                "It's cloudy in {} right now ({}% cloudiness).",
-                "It's not clear in {} right now ({}% cloudiness).",
-                "There are a ton of clouds in {} right now ({}% cloudiness).",
-            ]).format(place_name, cloudiness)
+            cloudiness_phrase = random.choice([
+                "It's cloudy",
+                "It's not clear",
+                "There are a ton of clouds",
+            ])
+
+    return f"{cloudiness_phrase} in {place_name}{get_time_descriptor()} " +\
+            f"({cloudiness}% cloudiness)."
 
 
 def humidity_handle(place_name, json):
@@ -142,28 +149,28 @@ def humidity_handle(place_name, json):
     # Provide either a status with the exact humidity, or one describing roughly how wet it is.
     if random.choice([True, False]):
         return random.choice([
-            "The humidity in {} is {}%, currently.".format(place_name, humidity),
-            "It is {}% humid in {} right now.".format(humidity, place_name),
+            f"The humidity in {place_name} is {humidity}%, currently.",
+            f"It is {humidity}% humid in {place_name} right now.",
         ])
 
     else:
         if humidity < 40:
             return random.choice([
-                "It is very dry in {} right now ({}% humidity).",
-                "It's very dry in {} ({}% humidity).",
-            ]).format(place_name, humidity)
+                f"It is very dry in {place_name} right now ({humidity}% humidity).",
+                f"It's very dry in {place_name} ({humidity}% humidity).",
+            ])
 
         elif humidity >= 40 and humidity < 75:
             return random.choice([
-                "It's mildly humid in {} ({}% humid).",
-                "It's kinda wet in {} ({}% humid).",
-            ]).format(place_name, humidity)
+                f"It's mildly humid in {place_name} ({humidity}% humid).",
+                f"It's kinda wet in {place_name} ({humidity}% humid).",
+            ])
 
         else:
             return random.choice([
-                "It's very humid in {} ({}% humid).",
-                "It's quite wet in {} right now ({}% humid).",
-            ]).format(place_name, humidity)
+                f"It's very humid in {place_name} ({humidity}% humid).",
+                f"It's quite wet in {place_name} right now ({humidity}% humid).",
+            ])
 
 
 def temp_handle(place_name, json):
@@ -173,11 +180,11 @@ def temp_handle(place_name, json):
 
     if random.choice(range(2)) > 0:
         celsius_temp = round(float(temp) - 273.15, 2)
-        return "It's {} °C in {} right now.".format(celsius_temp, place_name)
+        return f"It's {celsius_temp} °C in {place_name} right now."
 
     else:
         fahrenheit_temp = round((float(temp) * (9.0 / 5)) - 459.67, 2)
-        return "It's {} °F in {}.".format(fahrenheit_temp, place_name)
+        return f"It's {fahrenheit_tmep} °F in {place_name}."
 
 
 def sunthing_handle(thing, place_name, json):
@@ -199,30 +206,33 @@ def sunthing_handle(thing, place_name, json):
 
     if abs(now - sunthing_datetime) > timedelta(seconds=60) == sunthing_datetime:
         return random.choice([
-            "The {} is happening now in {}.",
-            "You can watch the {} now in {}.",
-            "You're missing the {} in {}.",
-        ]).format(sunthing, place_name)
+            f"The {sunthing} is happening now in {place_name}.",
+            f"You can watch the {sunthing} now in {place_name}.",
+            f"You're missing the {sunthing} in {place_name}.",
+        ])
 
     if now > sunthing_datetime:
         return random.choice([
-            "The last {} in {} happened at {} UTC.",
-            "Sorry, you missed the {} in {}, it was at {}.",
-            "You could have seen the {} in {}. It was at {}.",
-        ]).format(sunthing, place_name, formatted_datetime)
+            f"The last {sunthing} in {place_name} happened at {formatted_datetime} UTC.",
+            f"Sorry, you missed the {sunthing} in {place_name}, it was at {formatted_datetime}.",
+            f"You could have seen the {sunthing} in {place_name}. It was at {formatted_datetime}.",
+        ])
 
     else:
         return random.choice([
-            "The next {} in {} will happen at {} UTC.",
-            "You could watch the {} in {} at {} UTC.",
-        ]).format(sunthing, place_name, formatted_datetime)
+            f"The next {sunthing} in {place_name} will happen at {formatted_datetime} UTC.",
+            f"You could watch the {sunthing} in {place_name} at {formatted_datetime} UTC.",
+        ])
 
+def get_time_descriptor():
+    """Get a phrase like "currently" or "right now", or nothing at all. Provides leading space."""
+    return random.choice[" currently", " right now", " this moment", ""]
 
 # Wrappers around Open Weather Map API, to get weather info.
 def get_weather_from_api():
     """Get weather blob for a random city from the openweathermap API."""
-    zip = util.random_line("ZIP_CODES")
-    LOG.info("Random zip code is {}.".format(zip))
+    zip = botskeleton.random_line(path.join(HERE, "ZIP_CODES"))
+    LOG.info(f"Random zip code is {zip}.")
     url = get_zip_url(zip)
 
     weather = openweathermap_api_call(url)
@@ -232,12 +242,12 @@ def get_weather_from_api():
 
 def get_zip_url(zip):
     """Format a URL to get weather by zip code from the OpenWeatherMap API."""
-    return "{}?zip={},us&appid={}".format(WEATHER_ROOT, zip, API_KEY)
+    return f"{WEATHER_ROOT}?zip={zip},us&appid={API_KEY}"
 
 
 # Actual rate-limited API calls here.
 # Be cautious, because this is the second app I have behind this API_KEY.
-@util.rate_limited(900)
+@botskeleton.rate_limited(900)
 def openweathermap_api_call(url):
     """Perform a rate-limited API call."""
     return requests.get(url)

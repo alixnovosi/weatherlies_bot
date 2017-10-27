@@ -19,11 +19,24 @@ if __name__ == "__main__":
     LOG = botskeleton.set_up_logging()
 
     while True:
-        LOG.info("Sending a weather lie.")
-        weather = weather_gen.produce_status()
+        try:
+            weather = weather_gen.produce_status()
+        except Exception as e:
+            api.send_dm_sos(f"Bot {api.bot_name} had an error it can't recover from!\n{e}")
+            raise
+
         LOG.info(f"Sending:\n {weather}")
 
-        api.send(weather)
+        try:
+            api.send(weather)
+
+        except tweepy.TweepError as e:
+            if e.message == "Status is a duplicate.":
+                LOG.warning("Duplicate status.")
+                continue
+            else:
+                api.send_dm_sos(f"Bot {api.bot_name} had an error it can't recover from!\n{e}")
+                raise
 
         LOG.info(f"Sleeping for {DELAY} seconds.")
         time.sleep(random.choice(range(DELAY-DELAY_VARIATION, DELAY+DELAY_VARIATION+1)))
