@@ -184,7 +184,7 @@ def temp_handle(place_name, json):
 
     else:
         fahrenheit_temp = round((float(temp) * (9.0 / 5)) - 459.67, 2)
-        return f"It's {fahrenheit_tmep} °F in {place_name}."
+        return f"It's {fahrenheit_temp} °F in {place_name}."
 
 
 def sunthing_handle(thing, place_name, json):
