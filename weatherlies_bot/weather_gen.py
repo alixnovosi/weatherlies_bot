@@ -29,10 +29,9 @@ LOG = logging.getLogger("root")
 def produce_status():
     """Produce status from the current weather somewhere."""
     json = get_weather_from_api()
-    LOG.debug(f"Full JSON from weather API: {json}")
+    LOG.info(f"Full JSON from weather API: {json}")
 
-    name_json = get_weather_from_api()
-    place_name = name_json["name"]
+    place_name = json["name"]
     LOG.info(f"Producing weather lie for {place_name}")
 
     thing = random.choice(list(WeatherThings))
@@ -233,11 +232,30 @@ def get_weather_from_api():
     """Get weather blob for a random city from the openweathermap API."""
     zip = botskeleton.random_line(path.join(HERE, "ZIP_CODES"))
     LOG.info(f"Random zip code is {zip}.")
+
     url = get_zip_url(zip)
+    LOG.info(f"Hitting {url} for weather.")
 
     weather = openweathermap_api_call(url)
+    weather_json = weather.json()
 
-    return weather.json()
+
+    # Handle errors kinda sorta.
+    cod = weather_json["cod"]
+    if cod != 200:
+        LOG.info(f"Got non-200 code {cod}.")
+
+        # Handle 404 and 500 with one retry (seems to work for now).
+        if cod == 500 or cod == 404:
+            LOG.info(f"Cod is 500 or 404, attempting to retry.")
+            weather = openweathermap_api_call(url)
+            weather_json = weather.json()
+
+        else:
+            LOG.info(f"No clue how to handle code.")
+            raise Exception
+
+    return weather_json
 
 
 def get_zip_url(zip):
