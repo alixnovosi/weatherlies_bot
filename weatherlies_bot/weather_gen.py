@@ -253,7 +253,7 @@ def get_weather_from_api():
 
         else:
             LOG.info(f"No clue how to handle code.")
-            raise Exception
+            raise Exception(f"Received error {cod} from openweather API. Full response: {weather_json}")
 
     return weather_json
 
