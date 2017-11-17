@@ -1,4 +1,4 @@
-"""Main class to run randomweather_bot."""
+"""Main class to run weatherlies."""
 
 import os
 import random
