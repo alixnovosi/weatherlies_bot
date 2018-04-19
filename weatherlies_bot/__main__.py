@@ -16,7 +16,7 @@ if __name__ == "__main__":
     SECRETS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "SECRETS")
     BOT_SKELETON = botskeleton.BotSkeleton(SECRETS_DIR, bot_name="weatherlies_bot")
 
-    LOG = botskeleton.set_up_logging()
+    LOG = BOT_SKELETON.log
 
     while True:
         try:
