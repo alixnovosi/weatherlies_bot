@@ -13,7 +13,7 @@ setup(author="Andrew Michaud",
           "console_scripts": ["weatherlies_bot = weatherlies_bot.__main__:main"]
       },
 
-      install_requires=["weatherbotskeleton>=1.0.8", "requests>=2.18.4"],
+      install_requires=["weatherbotskeleton>=1.0.8"],
       python_requires=">=3.6",
 
       license="BSD3",
