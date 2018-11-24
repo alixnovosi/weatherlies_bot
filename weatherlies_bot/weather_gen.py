@@ -16,7 +16,7 @@ WEATHER_ROOT = "http://api.openweathermap.org/data/2.5/weather"
 with open(path.join(SECRETS_DIR, "api_key"), "r") as f:
     API_KEY = f.read().strip()
 
-OWNER_URL = "https://github.com/andrewmichaud/randweather_bot"
+OWNER_URL = "https://github.com/alixnovosi/randweather_bot"
 with open(path.join(path.join(HERE, ".."), "VERSION")) as f:
     VERSION = f.read().strip()
 
