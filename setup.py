@@ -23,6 +23,6 @@ setup(author="Andrew Michaud",
       packages=find_packages(),
 
       # Project"s main homepage
-      url="https://github.com/andrewmichaud/weatherlies_bot",
+      url="https://github.com/alixnovosi/weatherlies_bot",
 
       version=VERSION)
