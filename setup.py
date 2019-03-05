@@ -13,7 +13,7 @@ setup(author="Andrew Michaud",
           "console_scripts": ["weatherlies_bot = weatherlies_bot.__main__:main"]
       },
 
-      install_requires=["weatherbotskeleton>=1.2.0", "requests>=2.19.1"],
+      install_requires=["weatherbotskeleton>=1.4.0"],
       python_requires=">=3.6",
 
       license="BSD3",
@@ -22,7 +22,6 @@ setup(author="Andrew Michaud",
 
       packages=find_packages(),
 
-      # Project"s main homepage
       url="https://github.com/alixnovosi/weatherlies_bot",
 
       version=VERSION)
