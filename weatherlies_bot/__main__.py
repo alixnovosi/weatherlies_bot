@@ -29,5 +29,5 @@ if __name__ == "__main__":
         BOT_SKELETON.send(weather)
 
         BOT_SKELETON.set_delay(random.choice(range(DELAY-DELAY_VARIATION,
-                                                   DELAY+DELAY_VARIATION+1))
+                                                   DELAY+DELAY_VARIATION+1)))
         BOT_SKELETON.nap()
